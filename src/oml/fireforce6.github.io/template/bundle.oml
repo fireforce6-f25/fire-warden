@@ -1,0 +1,11 @@
+@dc:title "Template Bundle"
+@dc:description "A bundle that includes all descriptions in the Template project."
+description bundle <https://fireforce6.github.io/template/bundle#> as d-bundle {
+
+	uses <http://purl.org/dc/elements/1.1/> as dc
+     uses <https://fireforce6.github.io/sierra/bundle#>
+
+     // All descriptions included in this bundle
+     includes <https://fireforce6.github.io/template/description1#>
+
+}

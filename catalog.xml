@@ -1,0 +1,6 @@
+<?xml version='1.0'?>
+<catalog xmlns="urn:oasis:names:tc:entity:xmlns:xml:catalog" prefer="public">
+	<rewriteURI uriStartString="https://fireforce6.github.io/template/" rewritePrefix="src/oml/fireforce6.github.io/template/" />
+	<rewriteURI uriStartString="https://" rewritePrefix="build/oml/" />
+	<rewriteURI uriStartString="http://" rewritePrefix="build/oml/" />
+</catalog>

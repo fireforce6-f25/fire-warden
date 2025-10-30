@@ -1,0 +1,23 @@
+# Project's properties
+project:
+   title: Template
+   description: This is the template project
+   group: io.github.fireforce6
+   version: 0.1.0
+
+# Maven repositories
+repositories:
+   - https://repo.maven.apache.org/maven2
+
+# Maven dependencies
+dependencies:
+   - io.github.fireforce6:sierra-method:0.1.0
+
+# Project's datasets
+datasets:
+   template: # configured in fuseki.ttl
+      label: Template
+      description: The set of ontologies in this template project
+      iri: https://fireforce6.github.io/template/bundle
+      sources: [ 'src/oml' ]
+      queries: src/sparql
