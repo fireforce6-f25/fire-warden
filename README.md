@@ -1,7 +1,7 @@
-# Sierra Method
+# Fire Warden
 
-[![Build Status](https://github.com/fireforce6/fire-warden/actions/workflows/ci.yml/badge.svg)](https://github.com/fireforce6/fire-warden/actions/workflows/ci.yml)
-[![Release](https://img.shields.io/github/v/release/fireforce6/fire-warden?label=Release)](https://github.com/fireforce6/fire-warden/releases/latest)
+[![Build Status](https://github.com/fireforce6-f25/fire-warden/actions/workflows/ci.yml/badge.svg)](https://github.com/fireforce6-f25/fire-warden/actions/workflows/ci.yml)
+[![Release](https://img.shields.io/github/v/release/fireforce6-f25/fire-warden?label=Release)](https://github.com/fireforce6-f25/fire-warden/releases/latest)
 
 
 An [OML](https://github.com/opencaesar/oml)-based description for modeling and analyzing the Fire Warden project.
