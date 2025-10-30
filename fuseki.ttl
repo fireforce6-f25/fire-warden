@@ -8,7 +8,7 @@ PREFIX tdb:     <http://jena.hpl.hp.com/2008/tdb#>
 
 # the name of the dataset in Fuseki (matches one in onml.yml)
 :service
-    fuseki:name "template" .
+    fuseki:name "fire-warden" .
 
 #####################################################################################
 # Configuration provides a single Service exposing query/update/graphstore endpoints.

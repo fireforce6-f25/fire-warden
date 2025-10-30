@@ -1,7 +1,7 @@
 # Project's properties
 project:
-   title: Template
-   description: This is the template project
+   title: Fire Warden
+   description: This is the fire-warden project
    group: io.github.fireforce6
    version: 0.1.0
 
@@ -15,9 +15,9 @@ dependencies:
 
 # Project's datasets
 datasets:
-   template: # configured in fuseki.ttl
-      label: Template
-      description: The set of ontologies in this template project
-      iri: https://fireforce6.github.io/template/bundle
+   fire-warden: # configured in fuseki.ttl
+      label: Fire Warden
+      description: The set of ontologies in this fire-warden project
+      iri: https://fireforce6.github.io/fire-warden/bundle
       sources: [ 'src/oml' ]
       queries: src/sparql
