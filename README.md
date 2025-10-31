@@ -5,3 +5,6 @@
 
 
 <img width="1908" height="896" alt="image" src="https://github.com/user-attachments/assets/ae715753-2bec-43f8-9466-065930ade121" />
+
+Make sure Gemini CLI is installed, and you have logged in with a Google account.
+Then, run `node index.js`
