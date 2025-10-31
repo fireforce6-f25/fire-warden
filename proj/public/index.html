@@ -1,0 +1,641 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Fire Warden Demo</title>
+</head>
+<body>
+
+  <div id="simulationControl" style="margin-bottom: 15px">
+
+    <button onclick="simulationButton()">Start Simulation</button>
+
+  </div>
+
+  <style>
+
+
+
+    #simulationControl{
+      margin: 20px;
+    }
+    #simulationControl > button{
+      font-size: 30px;
+      box-shadow: 0px 0px 30px black;
+      background: gray;
+      padding: 13px;
+    }
+
+  </style>
+
+  <div id="toolBox">
+
+    <div id="addFire" class="toolButton" onclick="toolClicked('fire')">
+
+      <button>
+        <img src="fire.png">
+      </button>
+
+    </div>
+
+    <div id="addDrone" class="toolButton" onclick="toolClicked('drone')">
+
+      <button>
+        <img src="drone.png">
+      </button>
+
+    </div>
+
+    <div id="addHouse" class="toolButton" onclick="toolClicked('house')">
+
+      <button>
+        <img src="house.png">
+      </button>
+
+    </div>
+
+    <div id="addScissor" class="toolButton" onclick="toolClicked('scissor')">
+
+      <button>
+        <img src="scissor.png">
+      </button>
+
+    </div>
+
+  </div>
+
+  <div id="aiChat">
+
+      <p id="aiChatTitle"><b>AI Warden</b> Reasoning</p>
+
+  </div>
+
+  <style>
+
+    .reasoningText{
+      font-size: 25px;
+      padding: 20px;
+      border-bottom: 2px solid black;
+      margin-top: 0px;
+      margin-bottom: 0px;
+      font-family: Arial;
+    }
+
+    #aiChatTitle{
+
+      font-size: 30px;
+      text-align: center;
+      position: relative;
+      width: 100%;
+      top: 10px;
+      font-family: Arial;
+      padding-bottom: 40px;
+      border-bottom: 2px solid black;
+      margin-bottom: 10px;
+      text-shadow: 0px 0px 20px black;
+    }
+
+    #aiChat{
+      width: 500px;
+      height: 100%;
+      overflow-y: scroll;
+      overflow-x: hidden;
+      background: gray;
+      opacity: 0.9;
+      position: absolute;
+      right: 0px;
+      top: 0px;
+      box-shadow: 0px 0px 30px black;
+      border-left: solid 2px;
+    }
+    #aiChat::-webkit-scrollbar{
+      display: none;
+    }
+
+  </style>
+
+  <div id = "field">
+  </div>
+
+  <script>
+
+
+    let simulationState = "Stopped";
+
+    let fieldObjects = {};
+    const socket = new WebSocket('ws://localhost:3000'); // Use wss:// for secure connections
+
+    socket.onopen = () => {
+
+    };
+
+    socket.onmessage = event => {
+      //console.log(event.data);
+
+      let data = JSON.parse(event.data);
+
+      if(data.event == "fieldObjects"){
+        //console.log("received objects");
+        setFieldObjects(data.objects)
+      }
+      if(data.event == "simulationState"){
+        simulationState = data.state;
+        simulationStateChange();
+      }
+      if(data.event == "reasoning"){
+        let reasoningData = data.reasoning;
+        let reasoningBox = document.getElementById("aiChat");
+
+
+
+        console.log(reasoningData);
+
+        let reasoningText = document.createElement("p");
+
+
+        if(reasoningData.type == "init"){
+          reasoningText.innerHTML = "Gemini 2.5-Pro <b>Sent query...</b>"
+        }
+        if(reasoningData.type == "message" && reasoningData.role == "assistant"){
+          reasoningText.innerHTML = `<b>Assistant</b>: `;
+          reasoningText.innerHTML += reasoningData.content.split("JJJ").join("<br>");
+        }
+
+        reasoningText.classList.add("reasoningText");
+
+        console.log(reasoningText);
+
+        if(reasoningText.innerText.length > 0){
+          reasoningBox.appendChild(reasoningText);
+        }
+
+      }
+
+    };
+
+    function simulationButton(){
+
+      let data = {event: "simulationState", state: null};
+
+      if(simulationState == "Stopped"){
+        data.state = "Reasoning"
+        socket.send(JSON.stringify(data))
+      }
+      else if(simulationState == "Started"){
+        console.log("STOP SIMULATION");
+        data.state = "Stopped"
+        socket.send(JSON.stringify(data))
+      }
+
+    }
+
+    function simulationStateChange(){
+
+      let button = document.getElementById("simulationControl").children[0];
+      let toolbox = document.getElementById("toolBox");
+
+      if(simulationState == "Stopped"){
+        button.innerText = "Start Simulation"
+
+        toolbox.disabled = false
+        toolbox.style.opacity = 1;
+        toolbox.style.pointerEvents = "";
+        toolbox.style.userSelect = "";
+      }
+      else if(simulationState == "Reasoning"){
+        button.innerText = "Reasoning..."
+        button.disabled = true;
+        button.style.opacity = 0.5;
+
+        toolbox.disabled = true;
+        toolbox.style.opacity = 0.5;
+        toolbox.style.pointerEvents = "none";
+        toolbox.style.userSelect = "none";
+
+      }
+      else{
+        button.innerText = "Stop Simulation"
+        button.disabled = false;
+        button.style.opacity = 1;
+
+        toolbox.disabled = true;
+        toolbox.style.opacity = 0.5;
+        toolbox.style.pointerEvents = "none";
+        toolbox.style.userSelect = "none";
+      }
+
+    }
+
+    function setFieldObjects(objects){
+
+      let objectIDs = Object.keys(objects);
+      let currentIDs = Object.keys(fieldObjects);
+
+      for(var i = 0; i < currentIDs.length; i++){
+        if(objectIDs.indexOf(currentIDs[i]) == -1){
+
+          fieldObjects[currentIDs[i]].element.remove();
+          delete fieldObjects[currentIDs[i]];
+
+        }
+
+      }
+
+      for(var i = 0; i < objectIDs.length; i++){
+
+        let id = objectIDs[i];
+        let obj = objects[id];
+
+        if(!(id in fieldObjects)){
+
+          let newObj = createObjectElement(obj.objectType, obj.objectID);
+          newObj.style.left = obj.objectCoord[0] + "px";
+          newObj.style.top = obj.objectCoord[1] + "px";
+
+          let field = document.getElementById("field");
+          field.appendChild(newObj);
+
+          fieldObjects[id] = {element: newObj, data: obj};
+
+          newObj.onclick = () => {
+
+            console.log("CLICKED", newObj.id);
+
+          }
+
+          console.log(obj.objectCoord);
+
+        }
+        else{
+
+          let fieldObj = fieldObjects[id];
+
+          fieldObj.element.style.left = fieldObj.data.objectCoord[0] + "px";
+          fieldObj.element.style.top = fieldObj.data.objectCoord[1] + "px";
+          fieldObj.data = obj;
+
+          if(fieldObj.data.objectType == "drone"){
+
+            let target = obj.objectData.fireTarget;
+
+            if(target in fieldObjects){
+              let coord = fieldObjects[target].data.objectCoord;
+              let myCoord = fieldObj.data.objectCoord;
+
+              let delta = [coord[0] - myCoord[0], coord[1] - myCoord[1]];
+              let degree = deltaToAngle(delta);
+
+              //console.log(coord, myCoord, delta);
+
+              fieldObj.element.style.transform = `translate(-50%, -50%) rotate(${degree}deg)`;
+            }
+            else{
+              fieldObj.element.style.transform  = `translate(-50%, -50%) rotate(0deg)`;
+            }
+
+          }
+
+        }
+
+      }
+
+    }
+
+    function deltaToAngle(delta){
+      let angleInRadians = Math.atan2(delta[1], delta[0]);
+      let angleInDegrees = angleInRadians * (180 / Math.PI);
+      let angle = (angleInDegrees + 360) % 360;
+
+      return angle;
+    }
+
+    function createObjectElement(type, id){
+
+      let obj = document.createElement("div");
+      let img = document.createElement("img");
+      img.classList.add("fieldObjectImage");
+
+      if(type == "fire"){
+        img.src = "fire.png";
+
+      }
+      if(type == "drone"){
+        img.src = "drone.png";
+
+        let indicator = document.createElement("img");
+        indicator.src = "arrow.png"
+        indicator.classList.add("droneIndicator");
+
+
+        obj.appendChild(indicator);
+
+      }
+      if(type == "scissor"){
+        img.src = "scissor.png"
+      }
+      if(type == "house"){
+        img.src = "house.png"
+      }
+
+      obj.appendChild(img);
+      obj.classList.add("fieldObject")
+      obj.style.left = 0 + "px";
+      obj.style.top = 0 + "px";
+      obj.id = id;
+      obj.style.opacity = 0;
+
+      setTimeout(() => {
+        obj.style.opacity = 1;
+      }, 0)
+
+      return obj;
+
+    }
+
+
+    socket.onclose = () => {
+
+    };
+
+    socket.onerror = error => {
+      console.log(error.message);
+    };
+
+
+
+    let addObject = null;
+
+    let clicked = false;
+    let escaped = false;
+
+    let mouseX = 0;
+    let mouseY = 0;
+
+    document.addEventListener("keydown", (event) => {
+
+      const pressedKey = event.key;
+
+      if(pressedKey == "Escape"){
+        escaped = true;
+      }
+
+    })
+
+    document.addEventListener("mousedown", (event) => {
+
+      console.log(event);
+      clicked = true;
+
+    })
+
+    document.addEventListener('mousemove', (event) => {
+      mouseX = event.clientX;
+      mouseY = event.clientY;
+      //console.log(`Mouse X: ${mouseX}, Mouse Y: ${mouseY}`);
+    });
+
+    function toolClicked(tool){
+
+      let obj = createObjectElement(tool, "tool");
+
+
+      obj.style.transition = "left 0s linear, top 0s linear, opacity 0.1s linear"
+
+      document.body.appendChild(obj);
+
+      addObject = {type: tool, element: obj};
+
+
+
+    }
+
+    let fieldClick = false;
+    let prevObj = addObject;
+
+    setInterval(() => {
+
+      fieldClick = clicked;
+
+      let validSpot = true;
+      if(addObject != null){
+        addObject.element.style.left = mouseX + "px";
+        addObject.element.style.top = mouseY + "px";
+        if(prevObj == null){
+          fieldClick = false;
+          clicked = false;
+        }
+
+        let currentObjects = Object.keys(fieldObjects);
+
+        for(var i = 0; i < currentObjects.length; i++){
+
+          let obj = fieldObjects[currentObjects[i]];
+          let coord = obj.data.objectCoord;
+
+          let rect1 = {x: coord[0], y:coord[1], width: 100, height: 100};
+          let rect2 = {x: mouseX, y: mouseY, width: 100, height: 100};
+          let intersect = rectanglesIntersect(rect1, rect2);
+
+          if(intersect){
+            validSpot = false;
+            //console.log("Invalid");
+          }
+
+        }
+
+        if(addObject.type != "scissor"){
+          if(!validSpot){
+            addObject.element.style.opacity = 0.5;
+          }
+          else{
+            addObject.element.style.opacity = 1;
+          }
+        }
+
+
+      }
+
+      if(escaped && addObject != null){
+        addObject.element.remove()
+        addObject = null;
+      }
+
+      if(fieldClick == true && addObject != null){
+
+        if(addObject.type == "scissor"){
+
+          let currentObjects = Object.keys(fieldObjects);
+
+          let toRemove = [];
+
+          for(var i = 0; i < currentObjects.length; i++){
+
+            let obj = fieldObjects[currentObjects[i]];
+            let coord = obj.data.objectCoord;
+
+            let rect1 = {x: coord[0], y:coord[1], width: 100, height: 100};
+            let rect2 = {x: mouseX + 50, y: mouseY + 50, width: 0, height: 0};
+            let intersect = rectanglesIntersect(rect1, rect2);
+
+            if(intersect){
+              toRemove.push(currentObjects[i]);
+            }
+
+          }
+
+          console.log("SEND REMOVE", toRemove);
+
+          for(var i = 0; i < toRemove.length; i++){
+            let data = {
+              event: "removeObject",
+              objectID: toRemove[i]
+            }
+            socket.send(JSON.stringify(data));
+          }
+
+        }
+        else if(validSpot){
+          let data = {
+            event: "addObject",
+            objectType: addObject.type,
+            objectCoord: [mouseX, mouseY]
+          }
+
+          data.objectData = {};
+
+          if(addObject.type == "fire"){
+            data.objectData.size = 1;
+          }
+          if(addObject.type == "drone"){
+            data.objectData.fireTarget = "none";
+          }
+
+          socket.send(JSON.stringify(data));
+          addObject.element.remove()
+          addObject = null;
+        }
+
+      }
+
+      fieldClick = false;
+      clicked = false;
+      escaped = false;
+      prevObj = addObject;
+
+    })
+
+    setInterval(() => {
+
+      let data = {event: "requestObjects"};
+      socket.send(JSON.stringify(data));
+
+    }, 100)
+
+    function rectanglesIntersect(rect1, rect2) {
+
+      if (rect1.x + rect1.width <= rect2.x) {
+        return false;
+      }
+      if (rect1.x >= rect2.x + rect2.width) {
+        return false;
+      }
+
+      if (rect1.y + rect1.height <= rect2.y) {
+        return false;
+      }
+      if (rect1.y >= rect2.y + rect2.height) {
+        return false;
+      }
+      return true;
+    }
+
+
+  </script>
+
+  <style>
+
+    body{
+      overflow: hidden;
+    }
+
+    .fieldObject{
+
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      transform: translate(-50%, -50%) rotate(0deg);
+      transform-origin: "center";
+      transition: left 0.1s linear, top 0.1s linear, opacity 0.2s linear;
+
+    }
+
+    .fieldObject > .fieldObjectImage{
+      width: 100px;
+      height: 100px;
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      filter: drop-shadow(0px 0px 10px black)
+    }
+
+    .fieldObject > .droneIndicator{
+      width: 35px;
+      height: 35px;
+      position: absolute;
+      top: 32px;
+      left: 32px;
+      z-index: 1;
+    }
+
+    #field {
+      position: absolute;
+      top: 0px;
+      left: 0px;
+      z-index: -1;
+      width: 100%;
+      height: 100%;
+      background-color: lightgreen;
+      background-image: repeating-conic-gradient(forestgreen 0 25%, green 0 50%);
+      background-size: 400px 400px;
+    }
+
+    .toolButton > button{
+      width: 80px;
+      height: 80px;
+      margin: 10px;
+      margin-bottom: 0px;
+      position: relative;
+      box-shadow: 0px 0px 10px black;
+      background: #c7c7c7;
+    }
+
+    .toolButton > button > img{
+      width: 70px;
+      height: 70px;
+      position: absolute;
+      top: 3px;
+      left: 3px;
+      user-select: none;
+      user-drag: none;
+      pointer-events: none;
+    }
+    img{
+      user-select: none;
+      user-drag: none;
+      pointer-events: none;
+    }
+
+    #toolBox{
+      width: 100px;
+      height: 375px;
+      background: gray;
+      box-shadow: 0px 0px 30px black;
+      margin: 20px;
+      margin-top: 10px;
+    }
+
+  </style>
+
+</body>
+</html>
