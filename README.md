@@ -5,4 +5,3 @@
 
 
 <img width="1908" height="896" alt="image" src="https://github.com/user-attachments/assets/ae715753-2bec-43f8-9466-065930ade121" />
-(https://github.com/fireforce6-f25/fire-warden/tree/main/proj)[Github Folder]
