@@ -1,8 +1,17 @@
+const OpenAI = require("openai");
+const openai = new OpenAI({
+    apiKey: process.env.OPENAI_API_KEY, // Be sure to set your API key as an environment variable
+});
+
 const express = require('express');
 const http = require('http');
 const WebSocket = require('ws');
 const path = require('path');
-const { spawn } = require('child_process');
+/*
+const { GoogleGenerativeAI } = require("@google/generative-ai");
+const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
+*/
+console.log("API KEY: ", process.env.OPENAI_API_KEY)
 
 const app = express();
 const server = http.createServer(app);
@@ -12,6 +21,9 @@ app.use(express.static(path.join(__dirname, 'public')));
 
 let objectCounts = {};
 let fieldObjects = {}
+let goals = ["Redirect each and every drone to target the fires, maximizing safety and survivors.",
+              "Prioritize certain fires based on surroundings such as objects.",
+            "The more objects within about 100 units near a fire, the more drones should be sent to it."];
 
 setInterval(simulationStep, 50);
 
@@ -146,6 +158,41 @@ wss.on('connection', ws => {
           ws.send(JSON.stringify(messageData));
           ws.send(JSON.stringify({event: "simulationState", state: simulationState}));
         }
+        if(data.event == "removeGoal"){
+
+          let goal = data.index;
+          goals.splice(goal, 1);
+
+          let messageData = {};
+          messageData.event = "goals";
+          messageData.goals = goals;
+
+          ws.send(JSON.stringify(messageData));
+
+        }
+        if(data.event == "addGoal"){
+          let goal = data.goal;
+          goals.push(goal);
+
+          console.log("added goal", goal, data)
+
+          let messageData = {};
+          messageData.event = "goals";
+          messageData.goals = goals;
+
+          ws.send(JSON.stringify(messageData));
+        }
+        if(data.event == "requestGoals"){
+
+          let messageData = {};
+          messageData.event = "goals";
+          messageData.goals = goals;
+
+          console.log("sent goal");
+
+          ws.send(JSON.stringify(messageData));
+
+        }
         if(data.event == "removeObject"){
 
           let toRemove = data.objectID;
@@ -172,7 +219,7 @@ wss.on('connection', ws => {
 
         }
         if(data.event == "simulationState"){
-
+          /*
           if(data.state == "Reasoning"){
 
 
@@ -203,7 +250,7 @@ wss.on('connection', ws => {
             fireArrString = JSON.stringify(fireArrString);
             objectArrString = JSON.stringify(objectArrString)
 
-            const prompt = `"Position of drones: ${droneArrString}. Position of fires: ${fireArrString}. Position of objects: ${objectArrString}. Each object has width / height of 100 units. Coordinate represents top left corner. Redirect each and every drone to target the fires, maximizing safety and survivors. Output in the exact format (Example): JJJ [ { droneID: drone69, targetFire: fire32 }, { droneID: drone42, targetFire: fire47 }, ...all drones ] JJJ. Start and end your JSON output with the following characters: JJJ. Be sure JSON is valid with double quotes. Prioritize certain fires based on surroundings such as homes. The more homes within about 100 units near a fire, the more drones should be sent to it. A home 100 units from a fire is about the same danger as a home 5 units from a fire. You are not allowed to use external tools, only your reasoning is allowed. State your reasoning and THINK before outputting the JSON."`;
+            const prompt = `"Position of drones: ${droneArrString}. Position of fires: ${fireArrString}. Position of objects: ${objectArrString}. Each object has width / height of 100 units. Coordinate represents top left corner. Output in the exact format (Example): JJJ [ { droneID: drone69, targetFire: fire32 }, { droneID: drone42, targetFire: fire47 }, ...all drones ] JJJ. Start and end your JSON output with the following characters: JJJ. Be sure JSON is valid with double quotes. ${goals.join(" ")}. An object 100 units from a fire is about the same danger as a object 5 units from a fire. You are NOT allowed to use external tools. Do little reasoning, don't use too many tokens."`;
 
             console.log("SEND IN THE PROMPT: ", prompt);
 
@@ -213,10 +260,8 @@ wss.on('connection', ws => {
             const geminiProcess = spawn('gemini', [
                 '--output-format',
                 'stream-json',
-                /*
-        				'--model',
-        				'gemini-2.5-flash',
-                */
+                '--model',
+                'gemini-2.5-pro'
                 '--allowed-tools',
                 '[]',
                 prompt
@@ -280,6 +325,116 @@ wss.on('connection', ws => {
             });
 
           }
+          */
+
+          if (data.state == "Reasoning") {
+              (async () => {
+                  try {
+
+                      let droneArrString = [];
+                      let fireArrString = [];
+                      let objectArrString = [];
+
+                      let keys = Object.keys(fieldObjects);
+
+                      for (var i = 0; i < keys.length; i++) {
+                          if (keys[i].startsWith("drone")) {
+                              let obj = { droneID: keys[i], position: fieldObjects[keys[i]].objectCoord };
+                              droneArrString.push(obj);
+                          } else if (keys[i].startsWith("fire")) {
+                              let obj = { fireID: keys[i], position: fieldObjects[keys[i]].objectCoord };
+                              fireArrString.push(obj);
+                          } else {
+                              let obj = { objectID: keys[i], position: fieldObjects[keys[i]].objectCoord };
+                              objectArrString.push(obj);
+                          }
+                      }
+
+                      droneArrString = JSON.stringify(droneArrString);
+                      fireArrString = JSON.stringify(fireArrString);
+                      objectArrString = JSON.stringify(objectArrString);
+
+                      const prompt = `
+You are an AI Assistant. Be helpful, smart, and accurate. Your output will be written to the .innerHTML of an element. So you may only use HTML b tag or HTML em tag for emphasis. Do NOT use asterisks.
+
+"Position of drones:
+${droneArrString}.
+
+Position of fires:
+${fireArrString}.
+
+Position of objects:
+${objectArrString}.
+
+Each object has width / height of 100 units. Coordinate represents top left corner. Output in the exact format (Example): JJJ [ { "droneID": "drone69", "targetFire": "fire32" }, { "droneID": "drone42", "targetFire": "fire47" }, ...all drones ] JJJ. Start and end your JSON output with the following characters: JJJ. Be sure JSON is valid with double quotes. ${goals.join(" ")}. An object 100 units from a fire is about the same danger as a object 5 units from a fire. You are NOT allowed to use external tools. State your reasoning above your JSON."`;
+
+                      console.log("SEND IN THE PROMPT: ", prompt);
+
+                      simulationState = "Reasoning";
+                      ws.send(JSON.stringify({ event: "simulationState", state: simulationState }));
+
+                      // Make the API call to OpenAI
+                      const stream = await openai.chat.completions.create({
+                          model: "gpt-5.1", // Using a powerful and available model
+                          messages: [{ role: "user", content: prompt }],
+                          stream: true,
+                      });
+
+                      let buffer = '';
+                      // Notify the client that streaming has started.
+                      ws.send(JSON.stringify({ event: "reasoning", reasoning: { type: "init" } }));
+
+
+                      for await (const chunk of stream) {
+                        const chunkText = chunk.choices[0]?.delta?.content || "";
+                        buffer += chunkText;
+
+                        // Stream the chunks to the client
+                        let dataObj = { event: "reasoning", reasoning: { role: "assistant", content: chunkText } };
+                        console.log(`Streaming chunk: ${chunkText}`);
+
+                        ws.send(JSON.stringify({
+                            event: "reasoning",
+                            reasoning: {
+                                type: "message",
+                                role: "assistant",
+                                content: chunkText
+                            }
+                        }));
+
+                        //ws.send(JSON.stringify(dataObj));
+                      }
+
+                      console.log("Finished streaming.");
+                      console.log("Full response buffer:", buffer);
+
+                      // Extract the JSON part of the response.
+                      const jsonResponse = buffer.split("JJJ")[1];
+                      console.log("Extracted JSON:", jsonResponse);
+
+                      let ans = JSON.parse(jsonResponse);
+
+                      for (var i = 0; i < ans.length; i++) {
+                          let obj = ans[i];
+                          if (fieldObjects[obj["droneID"]]) {
+                              fieldObjects[obj["droneID"]].objectData.fireTarget = obj["targetFire"];
+                          }
+                      }
+
+                      simulationState = "Started";
+                      ws.send(JSON.stringify({ event: "simulationState", state: simulationState }));
+
+                  } catch (error) {
+                      console.error("Error during OpenAI API call:", error);
+                      // Notify the client of the error
+                      ws.send(JSON.stringify({ event: "error", message: "Failed to get response from OpenAI." }));
+                      simulationState = "Stopped";
+                      ws.send(JSON.stringify({event: "simulationState", state: simulationState}));
+                  }
+              })();
+          }
+
+
           if(data.state == "Stopped"){
             simulationState = "Stopped";
           }

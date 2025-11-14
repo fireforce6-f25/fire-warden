@@ -55,6 +55,14 @@
 
     </div>
 
+    <div id="addPerson" class="toolButton" onclick="toolClicked('person')">
+
+      <button>
+        <img src="person.png">
+      </button>
+
+    </div>
+
     <div id="addScissor" class="toolButton" onclick="toolClicked('scissor')">
 
       <button>
@@ -62,6 +70,25 @@
       </button>
 
     </div>
+
+
+  </div>
+
+
+  <div id="goals">
+
+    <button onclick="toggleGoals()" id="goalsToggle">Goals</button>
+
+      <div id ="goalsHolder" style="display: none">
+        <p id="goalsTitle"><b>AI Warden</b> Goals</p>
+        <div id ="goalsList">
+        </div>
+        <div id="addGoal">
+          <input placeholder="Type goal..." id="goalInput"></input>
+          <button onclick="addGoalButton()">Add</button>
+        </div>
+
+      </div>
 
   </div>
 
@@ -71,7 +98,23 @@
 
   </div>
 
+
   <style>
+
+    #goalsTitle{
+      font-size: 30px;
+      text-align: center;
+      position: relative;
+      width: 100%;
+      top: 10px;
+      font-family: Arial;
+      border-bottom: 2px solid black;
+      margin-bottom: 10px;
+      text-shadow: 0px 0px 20px black;
+      margin-top: 15px;
+      padding-bottom: 18px;
+      margin-bottom: 35px;
+    }
 
     .reasoningText{
       font-size: 25px;
@@ -79,7 +122,45 @@
       border-bottom: 2px solid black;
       margin-top: 0px;
       margin-bottom: 0px;
+      font-family: Monospace;
+      word-wrap: break-word;
+    }
+
+    .goalContainer{
+      margin-left: 25px;
+      margin-top: 10px;
+      align-items: left;
+      border-left: solid 5px rgb(60,60,60);
+      padding-bottom: 2px;
+      background: rgb(255,255,255,0.3);
+      width: 630px;
+      padding: 5px;
+      margin-bottom: 20px;
+    }
+    .goalContainer > p{
+      font-size: 20px;
       font-family: Arial;
+      word-wrap: break-word;
+      hyphens: auto;
+      max-width: 610px;
+      margin-top: 7px;
+      margin-bottom: 5px;
+      margin-left: 10px;
+    }
+    .goalContainer > button{
+      margin-left: 10px;
+      margin-top: 0px;
+      margin-bottom: 5px;
+      font-size: 20px;
+      height: 30px;
+      width: 300px;
+      background: rgb(255,100,100)
+    }
+
+
+    #goalsToggle{
+      background: gray;
+      box-shadow: 0px 0px 10px black;
     }
 
     #aiChatTitle{
@@ -94,6 +175,61 @@
       border-bottom: 2px solid black;
       margin-bottom: 10px;
       text-shadow: 0px 0px 20px black;
+    }
+
+    #goals{
+      position: absolute;
+      right: 500px;
+      top: 0px;
+      opacity: 0.9;
+      z-index: 1;
+    }
+
+    #goalsHolder{
+      width: 700px;
+      background: rgba(135, 135, 135, 0.93);
+      position: absolute;
+      right: 0px;
+      padding-bottom: 60px;
+      border: solid 1px black;
+    }
+
+    #goalsHolder > #addGoal{
+      bottom: 0px;
+      position: absolute;
+      margin: 15px;
+    }
+    #goalsHolder > #addGoal > input{
+      width: 600px;
+      height: 30px;
+      font-size: 20px;
+      background: white;
+      color: black;
+      box-shadow: 0px 0px 10px black;
+      outline: none;
+      padding: 5px;
+      background: rgba(255,255,255,0.3);
+    }
+    #goalsHolder > #addGoal > input::placeholder{
+      color: rgb(10,10,10);
+    }
+
+    #goalsHolder > #addGoal > button{
+      height: 45px;
+      font-size: 20px;
+      background: gray;
+      box-shadow: 0px 0px 10px black;
+
+    }
+
+    #goals > button{
+      width: 120px;
+      height: 55px;
+      font-size: 25px;
+      right: 0px;
+      position: absolute;
+      z-index: 1;
+      margin: 10px;
     }
 
     #aiChat{
@@ -126,6 +262,8 @@
     let fieldObjects = {};
     const socket = new WebSocket('ws://localhost:3000'); // Use wss:// for secure connections
 
+    let currentReasoningText = "";
+
     socket.onopen = () => {
 
     };
@@ -151,28 +289,60 @@
 
         console.log(reasoningData);
 
-        let reasoningText = document.createElement("p");
+
 
 
         if(reasoningData.type == "init"){
-          reasoningText.innerHTML = "Gemini 2.5-Pro <b>Sent query...</b>"
-        }
-        if(reasoningData.type == "message" && reasoningData.role == "assistant"){
-          reasoningText.innerHTML = `<b>Assistant</b>: `;
-          reasoningText.innerHTML += reasoningData.content.split("JJJ").join("<br>");
-        }
-
-        reasoningText.classList.add("reasoningText");
-
-        console.log(reasoningText);
-
-        if(reasoningText.innerText.length > 0){
+          let reasoningText = document.createElement("p");
+          currentReasoningText = `<b>Fire Warden</b>: `;
+          reasoningText.classList.add("reasoningText");
+          reasoningText.innerHTML = currentReasoningText;
           reasoningBox.appendChild(reasoningText);
         }
+        if(reasoningData.type == "message" && reasoningData.role == "assistant"){
 
+          let children = document.getElementById("aiChat").children;
+
+          console.log(children);
+
+          let reasoningText = children[children.length-1];
+
+          console.log(reasoningText);
+
+          currentReasoningText += reasoningData.content
+
+          reasoningText.innerHTML = currentReasoningText;
+
+          let elem = document.getElementById("aiChat")
+          elem.scrollTop = elem.scrollHeight;
+
+        }
+
+
+      }
+      if(data.event == "goals"){
+        console.log("creating");
+        createGoals(data.goals);
       }
 
     };
+
+    let displayGoals = false;
+
+    function toggleGoals(){
+      displayGoals = !displayGoals;
+
+      let goalsElem = document.getElementById("goalsHolder");
+
+      if(displayGoals){
+
+        goalsElem.style.display = ""
+
+      }
+      else{
+        goalsElem.style.display = "none"
+      }
+    }
 
     function simulationButton(){
 
@@ -337,6 +507,9 @@
       if(type == "house"){
         img.src = "house.png"
       }
+      if(type == "person"){
+        img.src = "person.png"
+      }
 
       obj.appendChild(img);
       obj.classList.add("fieldObject")
@@ -412,6 +585,72 @@
 
     let fieldClick = false;
     let prevObj = addObject;
+
+    function addGoalButton(){
+
+      console.log("clicked here");
+
+      let text = document.getElementById("goalInput").value;
+
+      console.log(text, document.getElementById("goalInput"))
+
+      if(text.length == 0) return;
+
+      let data = {event: "addGoal",
+                  goal: text};
+
+      socket.send(JSON.stringify(data));
+
+      document.getElementById("goalInput").value = "";
+
+    }
+
+    function createGoals(goals){
+
+      let current = document.getElementById("goalsList");
+
+      while(current.children.length > 0){
+        current.children[current.children.length - 1].remove();
+      }
+
+      for(var i = 0; i < goals.length; i++){
+
+        let goalText = document.createElement("p");
+        goalText.innerText = goals[i];
+
+        let deleteButton = document.createElement("button");
+        deleteButton.innerText = "Delete";
+
+        let goalContainer = document.createElement("div");
+        goalContainer.classList.add("goalContainer")
+
+        goalContainer.appendChild(goalText);
+        goalContainer.appendChild(deleteButton);
+        goalContainer.style.display = "flex";
+        goalContainer.style.flexDirection = "column"
+
+        let me = goalContainer;
+
+        deleteButton.onclick = () => {
+
+          let arr = Array.from(current.children);
+
+          let goalIndex = arr.indexOf(goalContainer)
+
+          console.log("CLICKED", goalIndex);
+
+          let data = {event: "removeGoal",
+                      index: goalIndex};
+          socket.send(JSON.stringify(data));
+
+
+        }
+
+        goalsList.appendChild(goalContainer);
+
+      }
+
+    }
 
     setInterval(() => {
 
@@ -532,6 +771,11 @@
 
     }, 100)
 
+    setTimeout(() => {
+      let data = {event: "requestGoals"};
+      socket.send(JSON.stringify(data));
+    }, 100)
+
     function rectanglesIntersect(rect1, rect2) {
 
       if (rect1.x + rect1.width <= rect2.x) {
@@ -628,7 +872,7 @@
 
     #toolBox{
       width: 100px;
-      height: 375px;
+      height: 470px;
       background: gray;
       box-shadow: 0px 0px 30px black;
       margin: 20px;
