@@ -34,7 +34,8 @@ Requests the current state of all objects on the field. The server will respond 
 ```json
 {
   "event": "requestObjects"
-}```
+}
+```
 
 #### **`addObject`**
 Adds a new object to the simulation field.
