@@ -1,0 +1,22 @@
+/*
+@dc:title "AI Fire Warden Bundle"
+description bundle <https://fireforce6.github.io/ai-fire-warden/bundle#> as d-bundle {
+    uses <http://purl.org/dc/elements/1.1/> as dc
+    uses <https://fireforce6.github.io/sierra/bundle#>
+
+    includes <https://fireforce6.github.io/ai-fire-warden/stakeholders_requirements#>
+    includes <https://fireforce6.github.io/ai-fire-warden/missions_capabilities#>
+    includes <https://fireforce6.github.io/ai-fire-warden/processes_activities#>
+    includes <https://fireforce6.github.io/ai-fire-warden/state_machines#>
+    includes <https://fireforce6.github.io/ai-fire-warden/scenarios#>
+}
+*/
+
+@dc:title "AI Fire Warden Bundle"
+description bundle <https://fireforce6.github.io/ai-fire-warden/bundle#> as d-bundle {
+    uses <http://purl.org/dc/elements/1.1/> as dc
+    uses <https://fireforce6.github.io/sierra/bundle#>
+
+    // CRITICAL: This includes the file we just made
+    includes <https://fireforce6.github.io/ai-fire-warden/simple_test#>
+}

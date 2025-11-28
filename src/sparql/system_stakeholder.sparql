@@ -1,0 +1,14 @@
+PREFIX requirement: <https://fireforce6.github.io/sierra/requirement#>
+PREFIX capability: <https://fireforce6.github.io/sierra/capability#>
+PREFIX base: <https://fireforce6.github.io/sierra/base#>
+
+SELECT DISTINCT ?Stakeholder ?Requirement ?Capability
+WHERE {
+    ?req a requirement:Requirement ;
+         base:description ?Requirement ;
+         requirement:isExpressedBy ?stk .
+    ?stk base:description ?Stakeholder .
+    
+    ?cap base:description ?Capability ;
+         capability:isDerivedFrom ?req .
+}

@@ -1,0 +1,15 @@
+PREFIX process: <https://fireforce6.github.io/sierra/process#>
+PREFIX base: <https://fireforce6.github.io/sierra/base#>
+PREFIX oml: <http://opencaesar.io/oml#>
+
+SELECT DISTINCT ?SourceActivity ?TargetActivity ?Data
+WHERE {
+    ?flow a process:DataFlow ;
+          oml:hasSource ?src ;
+          oml:hasTarget ?tgt ;
+          process:carries ?d .
+    
+    ?src base:description ?SourceActivity .
+    ?tgt base:description ?TargetActivity .
+    ?d base:description ?Data .
+}

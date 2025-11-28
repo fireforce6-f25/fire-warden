@@ -1,0 +1,58 @@
+@dc:title "Process vocabulary"
+@dc:description "Defines processes, activities, and data flows used to model behaviors and allocations."
+vocabulary <https://fireforce6.github.io/sierra/process#> as ^process {
+
+	extends <http://purl.org/dc/elements/1.1/> as dc
+	extends <https://fireforce6.github.io/sierra/base#> as base
+	extends <https://fireforce6.github.io/sierra/capability#> as capability
+	extends <https://fireforce6.github.io/sierra/entity#> as ^entity
+
+	// Entities
+
+	@dc:description "A modeled process composed of data flows between activities."
+	concept Process < base:Element
+
+	@dc:description "An Activity represents a unit of work."
+	concept Activity < base:Element
+
+	// Relations
+
+	@dc:description "Connects a Process to the Capability it describes."
+	relation describes [
+		from Process
+		to capability:Capability
+		reverse isDescribedBy
+	]
+
+	@dc:description "A Process includes DataFlows which connect Activities."
+	relation ^includes [
+		from Process
+		to DataFlow
+		reverse isIncludedIn
+	]
+
+	@dc:description "A DataFlow connects two Activities."
+	relation entity DataFlow [
+		from Activity
+		to Activity
+		forward flowsTo
+		reverse flowsFrom
+		irreflexive
+	] < base:Element
+
+	@dc:description "A DataFlow carries Data."
+	relation carries [
+		from DataFlow
+		to base:Data
+		reverse isCarriedBy
+	]
+
+	@dc:description "An Activity may be allocated to an Entity (resource allocation)."
+	relation isAllocatedTo [ 
+		from Activity 
+		to entity:Entity
+		reverse isResponsibleFor
+	]
+
+}
+

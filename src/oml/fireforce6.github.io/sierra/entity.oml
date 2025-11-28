@@ -1,0 +1,26 @@
+@dc:title "Entity vocabulary"
+@dc:description "Defines entities and actors and how capabilities involve entities."
+vocabulary <https://fireforce6.github.io/sierra/entity#> as ^entity {
+
+	extends <http://purl.org/dc/elements/1.1/> as dc
+	extends <https://fireforce6.github.io/sierra/base#> as base
+	extends <https://fireforce6.github.io/sierra/capability#> as capability
+	extends <https://fireforce6.github.io/sierra/requirement#> as requirement
+
+	// Entities
+
+	@dc:description "A generic operational entity (person, organization, system component)."
+	concept Entity < base:Element
+
+	@dc:description "An Actor represents an entity that plays roles as a stakeholder or participant. It is a Stakeholder and an Entity."
+	concept Actor < requirement:Stakeholder, Entity
+
+	// Relations
+
+	@dc:description "Indicates that a Capability involves an Entity (e.g., an actor participates in a capability)."
+	relation involves [
+		from capability:Capability
+		to Entity
+		reverse isInvolvedIn
+	]
+}

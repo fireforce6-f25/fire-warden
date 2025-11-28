@@ -1,0 +1,24 @@
+@dc:title "Processes and Activities"
+description <https://fireforce6.github.io/ai-fire-warden/processes_activities#> as processes_activities {
+    uses <http://purl.org/dc/elements/1.1/> as dc
+    uses <https://fireforce6.github.io/sierra/base#> as base
+    uses <https://fireforce6.github.io/sierra/process#> as process
+    extends <https://fireforce6.github.io/ai-fire-warden/missions_capabilities#> as caps
+
+    instance P1 : process:Process [
+        base:description "Tactical Planning Process"
+        process:describes caps:C1
+    ]
+
+    instance A1 : process:Activity [ base:description "Ingest Telemetry" ]
+    instance A2 : process:Activity [ base:description "Calculate Strategy" ]
+    instance A3 : process:Activity [ base:description "Execute Commands" ]
+
+    instance D1 : base:Data [ base:description "Sensor Data" ]
+    instance D2 : base:Data [ base:description "Plan JSON" ]
+
+    relation instance F1 : process:DataFlow [ from A1 to A2 process:carries D1 ]
+    relation instance F2 : process:DataFlow [ from A2 to A3 process:carries D2 ]
+
+    ref instance P1 [ process:includes F1 process:includes F2 ]
+}

@@ -1,0 +1,32 @@
+@dc:title "Capability vocabulary"
+@dc:description "Defines concepts and relations used to capture capabilities and their relationships to requirements."
+vocabulary <https://fireforce6.github.io/sierra/capability#> as capability {
+
+	extends <http://purl.org/dc/elements/1.1/> as dc
+	extends <https://fireforce6.github.io/sierra/base#> as base
+	extends <https://fireforce6.github.io/sierra/requirement#> as requirement
+
+	// Entities
+
+	@dc:description "An operational capability provided or required by the system or actors."
+	concept Capability < base:Element
+
+	@dc:description "A Mission is a specialized Capability representing a higher-level goal or mission objective."
+	concept Mission < Capability
+
+	// Relations
+
+	@dc:description "Indicates that a Capability is derived from a Requirement."
+	relation isDerivedFrom [
+		from Capability
+		to requirement:Requirement
+		reverse isSourceOf
+	]
+
+	@dc:description "Indicates that one Capability depends on or requires another Capability."
+	relation requires [
+		from Capability
+		to Capability
+		reverse isRequiredBy
+	]
+}

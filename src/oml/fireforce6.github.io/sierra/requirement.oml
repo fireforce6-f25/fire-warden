@@ -1,0 +1,24 @@
+@dc:title "Requirement vocabulary"
+@dc:description "Captures requirements and stakeholders."
+vocabulary <https://fireforce6.github.io/sierra/requirement#> as requirement {
+
+	extends <http://purl.org/dc/elements/1.1/> as dc
+	extends <https://fireforce6.github.io/sierra/base#> as base
+
+	// Entities
+
+	@dc:description "A Stakeholder is an entity that has interests in Requirements (people, organizations)."
+	concept Stakeholder < base:Element
+
+	@dc:description "A Requirement is an expressible statement describing a needed property or behavior."
+	concept Requirement < base:Expressible, base:Element
+
+	// Relations
+
+	@dc:description "Indicates that a Stakeholder expresses or owns a Requirement."
+	relation expresses [
+		from Stakeholder
+		to Requirement
+		reverse isExpressedBy
+	]
+}
