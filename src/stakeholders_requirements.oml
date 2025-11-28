@@ -1,0 +1,25 @@
+@dc:title "Stakeholder Requirements"
+description <https://fireforce6.github.io/ai-fire-warden/stakeholders_requirements#> as stakeholders_requirements {
+    uses <http://purl.org/dc/elements/1.1/> as dc
+    uses <https://fireforce6.github.io/sierra/base#> as base
+    uses <https://fireforce6.github.io/sierra/requirement#> as requirement
+    uses <https://fireforce6.github.io/sierra/entity#> as ent
+
+    instance MissionCommander : requirement:Stakeholder, ent:Actor [ 
+        base:description "Mission Commander" 
+    ]
+    instance SafetyOfficer : requirement:Stakeholder, ent:Actor [ 
+        base:description "Safety Officer" 
+    ]
+
+    instance R1 : requirement:Requirement [ 
+        base:description "Real-Time Coordination" 
+        base:expression "Coordinate 50+ agents with sub-second latency." 
+        requirement:isExpressedBy MissionCommander 
+    ]
+    instance R2 : requirement:Requirement [ 
+        base:description "Predictive Modeling" 
+        base:expression "Predict fire behavior 30 minutes into the future." 
+        requirement:isExpressedBy SafetyOfficer 
+    ]
+}

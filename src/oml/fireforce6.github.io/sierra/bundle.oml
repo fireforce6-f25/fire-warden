@@ -1,0 +1,14 @@
+@dc:title "Sierra bundle"
+@dc:description "A packaging bundle that includes all Sierra vocabularies for operational analysis."
+vocabulary bundle <https://fireforce6.github.io/sierra/bundle#> as v-bundle {
+
+	includes <http://purl.org/dc/elements/1.1/> as dc
+     includes <https://fireforce6.github.io/sierra/base#>
+     includes <https://fireforce6.github.io/sierra/capability#>
+     includes <https://fireforce6.github.io/sierra/entity#>
+     includes <https://fireforce6.github.io/sierra/process#>
+     includes <https://fireforce6.github.io/sierra/requirement#>
+     includes <https://fireforce6.github.io/sierra/scenario#>
+     includes <https://fireforce6.github.io/sierra/state#>
+
+}

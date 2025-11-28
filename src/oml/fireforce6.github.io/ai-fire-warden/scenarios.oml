@@ -1,0 +1,24 @@
+@dc:title "Scenarios"
+description <https://fireforce6.github.io/ai-fire-warden/scenarios#> as scenarios {
+    uses <http://purl.org/dc/elements/1.1/> as dc
+    uses <https://fireforce6.github.io/sierra/base#> as base
+    uses <https://fireforce6.github.io/sierra/scenario#> as scenario
+    extends <https://fireforce6.github.io/ai-fire-warden/missions_capabilities#> as caps
+    extends <https://fireforce6.github.io/ai-fire-warden/state_machines#> as sm
+
+    instance S1 : scenario:Scenario [ base:description "Santa Rosa Response" ]
+    instance L1 : scenario:Lifeline [ scenario:represents caps:AIFireWardenSystem ]
+    
+    instance TP1 : scenario:TimePoint []
+    instance TP2 : scenario:TimePoint []
+    ref instance TP1 [ scenario:before TP2 scenario:occursOn L1 ]
+    ref instance TP2 [ scenario:occursOn L1 ]
+
+    instance Msg1 : scenario:Message, scenario:Occurring [
+        base:description "Fire Detection Signal"
+        scenario:carries sm:Alert_Fire
+        scenario:atTime TP1
+    ]
+    
+    ref instance S1 [ scenario:hasLifeline L1 ]
+}

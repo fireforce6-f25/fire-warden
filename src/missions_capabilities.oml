@@ -1,0 +1,30 @@
+@dc:title "Missions and Capabilities"
+description <https://fireforce6.github.io/ai-fire-warden/missions_capabilities#> as missions_capabilities {
+    uses <http://purl.org/dc/elements/1.1/> as dc
+    uses <https://fireforce6.github.io/sierra/base#> as base
+    uses <https://fireforce6.github.io/sierra/capability#> as capability
+    uses <https://fireforce6.github.io/sierra/entity#> as ent
+    extends <https://fireforce6.github.io/ai-fire-warden/stakeholders_requirements#> as reqs
+
+    instance AIFireWardenSystem : ent:Entity [ base:description "AI Fire Warden System" ]
+
+    // Missions
+    instance M1 : capability:Mission [
+        base:description "Orchestrate Autonomous Response"
+        capability:isDerivedFrom reqs:R1
+    ]
+
+    // Capabilities (FIXED: Directly derived from Requirements for traceability query)
+    instance C1 : capability:Capability [
+        base:description "Multi-Agent Path Planning"
+        capability:isRequiredBy M1
+        capability:isDerivedFrom reqs:R1
+        ent:involves AIFireWardenSystem
+    ]
+    instance C2 : capability:Capability [
+        base:description "Fire Spread Prediction Engine"
+        capability:isRequiredBy M1
+        capability:isDerivedFrom reqs:R2
+        ent:involves AIFireWardenSystem
+    ]
+}
