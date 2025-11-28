@@ -1,0 +1,11 @@
+PREFIX requirement: <https://fireforce6.github.io/sierra/requirement#>
+PREFIX base: <https://fireforce6.github.io/sierra/base#>
+
+SELECT ?id ?description
+WHERE {
+    # Find anything that is a Requirement
+    ?id a requirement:Requirement .
+    
+    # Get its description
+    ?id base:description ?description .
+}
