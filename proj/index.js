@@ -11,7 +11,7 @@ const path = require('path');
 const { GoogleGenerativeAI } = require("@google/generative-ai");
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 */
-console.log("API KEY: ", process.env.OPENAI_API_KEY)
+//console.log("API KEY: ", process.env.OPENAI_API_KEY)
 
 const app = express();
 const server = http.createServer(app);
@@ -457,3 +457,4 @@ server.listen(PORT, () => {
     console.log(`Server listening on port ${PORT}`);
     console.log(`Open http://localhost:${PORT} in your browser`);
 });
+
